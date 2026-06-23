@@ -1,0 +1,32 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum StatusTarefa {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+}
+
+enum PrioridadeTarefa {
+  BAIXA
+  MEDIA
+  ALTA
+}
+
+model Tarefa {
+  id           Int               @id @default(autoincrement())
+  titulo       String            @db.VarChar(100)
+  descricao    String?           @db.VarChar(500)
+  status       StatusTarefa      @default(PENDENTE)
+  prioridade   PrioridadeTarefa  @default(MEDIA)
+  dataLimite   DateTime?
+  criadaEm     DateTime          @default(now())
+  atualizadaEm DateTime          @updatedAt
+}
