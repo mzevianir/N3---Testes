@@ -370,3 +370,64 @@ O CRUD e a conexão com o banco estão estruturados. Ainda devem ser adicionados
 - não publique a senha do banco;
 - caso uma credencial seja exposta, altere-a no Supabase;
 - mantenha somente o `.env.example` no Git.
+
+---
+
+## Testes de Carga com Grafana K6
+
+O projeto conta com um script de teste de carga (`tarefas-load-test.js`) que simula o fluxo completo de um usuário na API (Criar, Listar, Buscar por ID, Atualizar e Deletar uma tarefa).
+
+### 1. Instalação do K6
+
+No Windows, instale o K6 utilizando o Winget:
+
+```bash
+winget install k6 --source winget
+
+```
+
+*(Caso utilize outro sistema operacional, consulte a documentação oficial do K6 para instalação).*
+
+### 2. Ajuste Importante de Conexão (⚠️ Crítico para o Supabase)
+
+Por padrão, testes de carga geram múltiplos acessos simultâneos. Como a aplicação utiliza uma versão gratuita ou limitada do Supabase, **o banco de dados não vai aguentar o volume de requisições e começará a retornar erros**.
+
+Para resolver isso e garantir que o teste passe com 100% de sucesso, você **precisa** limitar as conexões simultâneas que o Prisma abre. Altere o seu arquivo `.env` adicionando `&connection_limit=3` ao final da string da `DATABASE_URL`:
+
+```env
+DATABASE_URL="postgresql://postgres.SEU_PROJECT_REF:SUA_SENHA@HOST_POOLER:6543/postgres?pgbouncer=true&connection_limit=3"
+
+```
+
+### 3. Como Customizar a Carga
+
+A intensidade e a duração do teste são controladas diretamente no objeto `options` dentro do arquivo do teste:
+
+```javascript
+export const options = {
+  stages: [
+    { duration: '20s', target: 2 },  // Sobe para 2 usuários virtuais em 20 segundos
+    { duration: '20s', target: 2 },  // Mantém 2 usuários virtuais por mais 20 segundos
+    { duration: '20s', target: 0 },  // Desce para 0 usuários em 20 segundos (rampa de descida)
+  ],
+  thresholds: {
+    http_req_failed: ["rate<0.02"], // O teste falha se mais de 2% das requisições derem erro
+    http_req_duration: ["p(95)<400"], // 95% das requisições devem responder em menos de 400ms
+  },
+};
+
+```
+
+* **`duration`**: Tempo de duração daquela etapa específica.
+* **`target`**: Quantidade de Usuários Virtuais (VUs) simultâneos simulando ações na API. Se quiser testar cenários mais pesados (ex: 10, 50 ou 100 usuários), basta alterar esse valor.
+
+### 4. Executando o Teste
+
+Com a API rodando localmente (`npm run dev`), abra outro terminal e execute o comando:
+
+```bash
+k6 run tarefas-load-test.js
+
+```
+
+Ao final, o K6 exibirá um relatório completo no terminal mostrando se as métricas de sucesso e tempo de resposta foram atingidas.
