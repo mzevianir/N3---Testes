@@ -1,34 +1,29 @@
-  {
-    "name": "backend-tarefas-reaproveitavel",
-    "version": "1.0.0",
-    "description": "Backend reaproveitado e simplificado do projeto CRUD Estilo Trello",
-    "private": true,
-    "main": "dist/server.js",
-    "scripts": {
-      "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-      "build": "tsc",
-      "start": "node dist/server.js",
-      "test": "jest",
-      "prisma:generate": "prisma generate",
-      "prisma:migrate": "prisma migrate dev",
-      "prisma:studio": "prisma studio"
-    },
-    "dependencies": {
-      "@prisma/client": "^6.19.2",
-      "cors": "^2.8.6",
-      "dotenv": "^17.2.3",
-      "express": "^5.2.1"
-    },
-    "devDependencies": {
-      "@types/cors": "^2.8.19",
-      "@types/express": "^5.0.6",
-      "@types/jest": "^30.0.0",
-      "@types/node": "^25.0.8",
-      "jest": "^30.4.2",
-      "prisma": "^6.19.3",
-      "ts-jest": "^29.4.11",
-      "ts-node-dev": "^2.0.0",
-      "typescript": "^5.9.3"
-    },
-    "packageManager": "npm@11.3.0+sha512.96eb611483f49c55f7fa74df61b588de9e213f80a256728e6798ddc67176c7b07e4a1cfc7de8922422cbce02543714367037536955221fa451b0c4fefaf20c66"
+{
+  "name": "backend-tarefas-reaproveitavel",
+  "version": "1.0.0",
+  "description": "Backend reaproveitado e simplificado do projeto CRUD Estilo Trello",
+  "private": true,
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.8",
+    "prisma": "^6.19.3",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
   }
