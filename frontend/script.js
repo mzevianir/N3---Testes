@@ -32,7 +32,7 @@ function renderizarCardTarefa(tarefa) {
     listaTarefas.appendChild(card);
 }
 
-// 1. GET Paginado (Listagem Geral)
+// GET Paginado (Listagem Geral)
 async function carregarTarefas() {
     try {
         const response = await fetch(`${API_URL}?page=1&limit=100`);
@@ -50,11 +50,11 @@ async function carregarTarefas() {
     }
 }
 
-// GET by ID (Busca Visual no Front-end)
+// GET by ID (Busca Visual)
 btnBuscar.addEventListener('click', async () => {
     const id = inputBuscaId.value;
     
-    // Se o campo estiver vazio, funciona como o "Ver Todas" (recarrega a lista geral)
+    // Se o campo estiver vazio, funciona como o "Ver Todas"
     if (!id) {
         carregarTarefas();
         return;

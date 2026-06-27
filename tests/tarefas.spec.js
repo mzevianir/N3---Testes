@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-// Altere para a porta onde o seu Live Server (ou similar) está rodando o front-end
+// Altera para a porta onde o seu Live Server está rodando o front-end
 const URL_FRONTEND = 'http://127.0.0.1:5500/frontend/';
 
 test.describe('Testes E2E - Gerenciamento de Tarefas', () => {
@@ -25,9 +25,8 @@ test.describe('Testes E2E - Gerenciamento de Tarefas', () => {
     });
 
     test('2. Deve buscar uma tarefa específica pelo ID (GET by ID)', async ({ page }) => {
-        // Primeiro, vamos ler o ID da primeira tarefa que aparece na listagem para testar a busca
         const badgeID = await page.locator('.badges span').filter({ hasText: 'ID:' }).first().innerText();
-        const idTarefa = badgeID.replace('ID: ', '').trim(); // Extrai apenas o número
+        const idTarefa = badgeID.replace('ID: ', '').trim(); 
 
         // Digita o ID no campo de busca e clica em Buscar
         await page.fill('#busca-id', idTarefa);
@@ -39,7 +38,6 @@ test.describe('Testes E2E - Gerenciamento de Tarefas', () => {
     });
 
     test('3. Deve carregar os dados no formulário e atualizar a tarefa (PUT)', async ({ page }) => {
-        // Clica no botão "Editar" da primeira tarefa da lista
         await page.click('[data-testid="btn-editar"] >> nth=0');
 
         // Altera o título para um novo valor
@@ -55,10 +53,9 @@ test.describe('Testes E2E - Gerenciamento de Tarefas', () => {
     });
 
     test('4. Deve excluir uma tarefa com sucesso (DELETE)', async ({ page }) => {
-        // Como o seu script usa o confirm(), precisamos dizer ao Playwright para aceitar o alerta nativo
         page.on('dialog', async dialog => {
             expect(dialog.message()).toContain('Tem certeza que deseja excluir');
-            await dialog.accept(); // Clica em "OK" no confirm do navegador
+            await dialog.accept(); 
         });
 
         // Guarda o número de tarefas antes da exclusão
