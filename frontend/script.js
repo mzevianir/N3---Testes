@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/tarefas';
+const API_URL = '/api/tarefas';
 
 // Elementos do DOM
 const form = document.getElementById('tarefa-form');

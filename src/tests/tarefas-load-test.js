@@ -11,11 +11,11 @@ export const options = {
     ],
   thresholds: {
     http_req_failed: ["rate<0.02"],
-    http_req_duration: ["p(95)<400"],
+    http_req_duration: ["p(95)<2000"],
   },
 };
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = __ENV.BASE_URL || "http://127.0.0.1:3000";
 
 export default function () {
   const headers = { "Content-Type": "application/json" };

@@ -1,151 +1,139 @@
-# API RESTful de Tarefas
+# API RESTful de Gerenciamento de Tarefas
 
-Back-end da aplicação acadêmica de gerenciamento de tarefas. A API foi construída com Node.js, TypeScript, Express, Prisma e PostgreSQL hospedado no Supabase.
+Projeto desenvolvido para a atividade N3, com uma API RESTful e um front-end simples para gerenciamento de tarefas.
 
-O projeto disponibiliza os cinco endpoints obrigatórios do trabalho:
+A aplicação permite criar, listar, consultar, editar e excluir tarefas. Também foram implementados a documentação OpenAPI, testes unitários no back-end, testes de interface com Playwright e teste de carga com Grafana K6.
 
-- listagem paginada;
-- consulta por ID;
-- criação;
-- atualização;
-- exclusão.
+## Entidade escolhida
 
-## Tecnologias
+A entidade utilizada no projeto foi **Tarefa**.
 
-- Node.js
-- TypeScript
-- Express
-- Prisma ORM
-- PostgreSQL
-- Supabase
-- CORS
-- dotenv
+Cada tarefa possui os seguintes campos:
+
+| Campo          | Tipo          | Descrição                                  |
+| -------------- | ------------- | ------------------------------------------ |
+| `id`           | inteiro       | Identificador gerado automaticamente       |
+| `titulo`       | texto         | Título da tarefa, entre 3 e 100 caracteres |
+| `descricao`    | texto ou nulo | Descrição com até 500 caracteres           |
+| `status`       | enum          | `PENDENTE`, `EM_ANDAMENTO` ou `CONCLUIDA`  |
+| `prioridade`   | enum          | `BAIXA`, `MEDIA` ou `ALTA`                 |
+| `dataLimite`   | data ou nulo  | Data limite da tarefa                      |
+| `criadaEm`     | data e hora   | Data de criação                            |
+| `atualizadaEm` | data e hora   | Data da última atualização                 |
+
+## Tecnologias utilizadas
+
+### Back-end
+
+* Node.js
+* TypeScript
+* Express
+* Prisma ORM
+* PostgreSQL
+* Supabase
+* dotenv
+* CORS
+
+### Front-end
+
+* HTML
+* CSS
+* JavaScript
+
+### Documentação e testes
+
+* OpenAPI 3
+* Swagger UI
+* Jest
+* ts-jest
+* Playwright
+* Grafana K6
+
+## Organização do projeto
+
+O back-end foi dividido em camadas para separar melhor as responsabilidades:
+
+* **Routes:** definição das rotas e métodos HTTP;
+* **Controllers:** recebimento das requisições e envio das respostas;
+* **Services:** regras de negócio e validações;
+* **Repositories:** acesso ao banco de dados;
+* **DTOs:** formatos utilizados na entrada e saída dos dados;
+* **Middlewares:** tratamento centralizado de erros;
+* **Prisma:** comunicação com o PostgreSQL.
+
+Fluxo principal da aplicação:
+
+```text
+Front-end
+   ↓
+Route
+   ↓
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ↓
+Prisma
+   ↓
+PostgreSQL / Supabase
+```
+
+## Decisões do projeto
+
+O front-end é servido pela própria aplicação Express. Por isso, não é necessário utilizar o Live Server ou iniciar outro servidor separado.
+
+Os testes unitários ficam em `src/tests`, enquanto os testes de interface com Playwright ficam na pasta `tests`. Essa separação evita que o Jest tente executar os arquivos do Playwright.
+
+A pasta `dist` é criada automaticamente pelo comando de build e, por isso, não precisa ser enviada ao GitHub.
 
 ## Pré-requisitos
 
-Antes de executar o projeto, instale:
+Antes de executar o projeto, é necessário ter instalado:
 
-- Node.js 20 ou superior;
-- npm;
-- uma conta e um projeto no Supabase.
+* Node.js 20 ou superior;
+* npm;
+* Git;
+* Grafana K6;
+* um projeto PostgreSQL no Supabase.
 
-## Estrutura do projeto
+O K6 é instalado separadamente e não faz parte das dependências do npm.
 
-```text
-backend-tarefas-reaproveitavel/
-├── prisma/
-│   ├── migrations/
-│   └── schema.prisma
-├── src/
-│   ├── controllers/
-│   │   └── tarefaController.ts
-│   ├── database/
-│   │   └── prisma.ts
-│   ├── dtos/
-│   │   └── tarefaDTO.ts
-│   ├── errors/
-│   │   └── AppError.ts
-│   ├── middlewares/
-│   │   └── errorHandler.ts
-│   ├── repositories/
-│   │   └── tarefaRepository.ts
-│   ├── routes/
-│   │   └── tarefaRoutes.ts
-│   ├── services/
-│   │   └── tarefaService.ts
-│   ├── app.ts
-│   └── server.ts
-├── .env.example
-├── .gitignore
-├── package.json
-├── README.md
-└── tsconfig.json
+No Windows, ele pode ser instalado com:
+
+```powershell
+winget install k6 --source winget
 ```
 
-## Arquitetura
+Depois da instalação, feche e abra novamente o terminal e confirme:
 
-O projeto utiliza separação em camadas:
-
-- **Routes:** define os caminhos e métodos HTTP;
-- **Controller:** recebe a requisição e devolve a resposta HTTP;
-- **Service:** contém validações e regras de negócio;
-- **Repository:** realiza as operações no banco de dados;
-- **DTO:** define os formatos de entrada e saída;
-- **Middleware:** centraliza o tratamento de erros.
-
-Fluxo principal:
-
-```text
-Requisição → Route → Controller → Service → Repository → Prisma → Supabase
+```powershell
+k6 version
 ```
 
-## Entidade Tarefa
+## Configuração do ambiente
 
-| Campo | Tipo | Obrigatório | Observação |
-|---|---|---:|---|
-| `id` | inteiro | automático | Chave primária |
-| `titulo` | texto | sim | Entre 3 e 100 caracteres |
-| `descricao` | texto | não | Máximo de 500 caracteres |
-| `status` | enum | não no POST | Padrão: `PENDENTE` |
-| `prioridade` | enum | não no POST | Padrão: `MEDIA` |
-| `dataLimite` | data e hora | não | Aceita valor nulo |
-| `criadaEm` | data e hora | automático | Preenchido pelo banco |
-| `atualizadaEm` | data e hora | automático | Atualizado pelo Prisma |
+Na raiz do projeto, crie um arquivo `.env` com base no `.env.example`.
 
-### Valores aceitos para status
-
-```text
-PENDENTE
-EM_ANDAMENTO
-CONCLUIDA
-```
-
-### Valores aceitos para prioridade
-
-```text
-BAIXA
-MEDIA
-ALTA
-```
-
-## Configuração do Supabase
-
-No painel do Supabase, acesse **Connect → ORMs → Prisma** e copie as strings de conexão.
-
-Crie um arquivo `.env` na raiz do projeto com o seguinte formato:
+Exemplo:
 
 ```env
-DATABASE_URL="postgresql://postgres.SEU_PROJECT_REF:SUA_SENHA@HOST_POOLER:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.SEU_PROJECT_REF:SUA_SENHA@HOST_POOLER:5432/postgres"
+DATABASE_URL="URL_DE_CONEXAO_DO_SUPABASE"
+DIRECT_URL="URL_DIRETA_DO_SUPABASE"
 PORT=3000
 ```
 
-- `DATABASE_URL` é usada pela aplicação durante a execução;
-- `DIRECT_URL` é usada pelo Prisma para migrations;
-- o arquivo `.env` não deve ser enviado para o Git.
-
-No `prisma/schema.prisma`, o datasource deve usar essas variáveis:
-
-```prisma
-datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
-}
-```
+* `DATABASE_URL` é usada pela aplicação;
+* `DIRECT_URL` é usada pelo Prisma nas migrations;
+* o arquivo `.env` não deve ser enviado ao GitHub, pois contém os dados de acesso ao banco;
+* o arquivo `.env.example` deve permanecer no repositório sem informações reais.
 
 ## Instalação
 
-Na raiz do projeto, execute:
+Instale as dependências:
 
 ```bash
 npm install
-```
-
-Valide o schema:
-
-```bash
-npx prisma validate
 ```
 
 Gere o Prisma Client:
@@ -154,29 +142,51 @@ Gere o Prisma Client:
 npx prisma generate
 ```
 
-Aplique as migrations:
+Instale o navegador usado pelo Playwright:
 
 ```bash
-npx prisma migrate dev --name init
+npx playwright install chromium
 ```
 
-Caso o banco já esteja configurado e a migration já tenha sido aplicada, não é necessário criar outra migration com o mesmo nome.
+## Banco de dados
 
-## Execução
+Para validar o schema do Prisma:
 
-Modo de desenvolvimento:
+```bash
+npx prisma validate
+```
+
+Para aplicar as migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+Caso as migrations já tenham sido aplicadas no banco configurado, não é necessário criar uma nova migration.
+
+Para abrir o Prisma Studio:
+
+```bash
+npm run prisma:studio
+```
+
+## Execução da aplicação
+
+Para iniciar o projeto em modo de desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-A API será iniciada em:
+A aplicação ficará disponível em:
 
 ```text
 http://localhost:3000
 ```
 
-Verificação rápida:
+O front-end e a API são disponibilizados pelo mesmo servidor.
+
+### Verificação de saúde da API
 
 ```http
 GET http://localhost:3000/health
@@ -190,6 +200,52 @@ Resposta esperada:
 }
 ```
 
+### Build
+
+Para compilar o TypeScript:
+
+```bash
+npm run build
+```
+
+Para executar a versão compilada:
+
+```bash
+npm start
+```
+
+## Front-end
+
+Com a aplicação em execução, acesse:
+
+```text
+http://localhost:3000
+```
+
+Pela interface é possível:
+
+* listar tarefas;
+* buscar uma tarefa pelo ID;
+* criar uma nova tarefa;
+* editar uma tarefa existente;
+* excluir uma tarefa.
+
+## Documentação OpenAPI
+
+A documentação da API com Swagger UI está disponível em:
+
+```text
+http://localhost:3000/docs
+```
+
+O arquivo OpenAPI em JSON está disponível em:
+
+```text
+http://localhost:3000/docs.json
+```
+
+Pelo Swagger é possível visualizar e testar os cinco endpoints da API.
+
 ## Endpoints
 
 ### Listar tarefas com paginação
@@ -198,46 +254,16 @@ Resposta esperada:
 GET /api/tarefas?page=1&limit=10
 ```
 
-Parâmetros:
-
-| Parâmetro | Padrão | Regra |
-|---|---:|---|
-| `page` | 1 | Inteiro maior ou igual a 1 |
-| `limit` | 10 | Inteiro entre 1 e 100 |
-
-Exemplo de resposta:
-
-```json
-{
-  "success": true,
-  "data": [],
-  "pagination": {
-    "page": 1,
-    "limit": 10,
-    "totalItems": 0,
-    "totalPages": 0
-  }
-}
-```
+| Parâmetro | Valor padrão | Regra                      |
+| --------- | -----------: | -------------------------- |
+| `page`    |            1 | Inteiro maior ou igual a 1 |
+| `limit`   |           10 | Inteiro entre 1 e 100      |
 
 ### Buscar tarefa por ID
 
 ```http
-GET /api/tarefas/1
+GET /api/tarefas/{id}
 ```
-
-Resposta de sucesso: `200 OK`.
-
-Quando a tarefa não existe:
-
-```json
-{
-  "success": false,
-  "message": "Tarefa não encontrada."
-}
-```
-
-Código: `404 Not Found`.
 
 ### Criar tarefa
 
@@ -246,188 +272,140 @@ POST /api/tarefas
 Content-Type: application/json
 ```
 
-Corpo:
+Exemplo:
 
 ```json
 {
-  "titulo": "Documentar a API",
-  "descricao": "Criar a documentação OpenAPI",
+  "titulo": "Finalizar trabalho",
+  "descricao": "Executar todos os testes automatizados",
   "status": "PENDENTE",
   "prioridade": "ALTA",
   "dataLimite": "2026-07-15"
 }
 ```
 
-Resposta de sucesso: `201 Created`.
-
 ### Atualizar tarefa
 
 ```http
-PUT /api/tarefas/1
+PUT /api/tarefas/{id}
 Content-Type: application/json
 ```
 
-Como o endpoint usa `PUT`, os campos `titulo`, `status` e `prioridade` devem ser enviados.
+Exemplo:
 
 ```json
 {
-  "titulo": "Documentar e revisar a API",
-  "descricao": "Finalizar a documentação OpenAPI",
-  "status": "EM_ANDAMENTO",
+  "titulo": "Finalizar trabalho atualizado",
+  "descricao": "Testes concluídos",
+  "status": "CONCLUIDA",
   "prioridade": "ALTA",
-  "dataLimite": "2026-07-20"
+  "dataLimite": "2026-07-15"
 }
 ```
-
-Resposta de sucesso: `200 OK`.
 
 ### Excluir tarefa
 
 ```http
-DELETE /api/tarefas/1
+DELETE /api/tarefas/{id}
 ```
 
-Resposta de sucesso: `204 No Content`.
+Resposta de sucesso:
 
-A exclusão é física: o registro é removido do banco.
-
-## Códigos HTTP
-
-| Código | Uso |
-|---:|---|
-| `200` | Consulta ou atualização realizada com sucesso |
-| `201` | Tarefa criada com sucesso |
-| `204` | Tarefa excluída com sucesso |
-| `400` | Dados, parâmetros ou ID inválidos |
-| `404` | Tarefa não encontrada |
-| `500` | Erro interno inesperado |
-
-## Padrão de respostas
-
-Sucesso:
-
-```json
-{
-  "success": true,
-  "message": "Operação realizada com sucesso.",
-  "data": {}
-}
+```text
+204 No Content
 ```
 
-Erro:
+## Testes automatizados
 
-```json
-{
-  "success": false,
-  "message": "Descrição do erro."
-}
+### Testes unitários com Jest
+
+Os testes unitários validam as regras da camada de serviço, incluindo cenários de sucesso e erro para criação, listagem, consulta, atualização e exclusão.
+
+Execute:
+
+```bash
+npm test
 ```
 
-## Scripts disponíveis
+Resultado obtido:
+
+```text
+Test Suites: 1 passed
+Tests: 15 passed
+```
+
+### Testes de front-end com Playwright
+
+Os testes de interface validam os principais fluxos do front-end:
+
+1. criação e listagem;
+2. consulta por ID;
+3. atualização;
+4. exclusão.
+
+Execute:
+
+```bash
+npm run test:playwright
+```
+
+Resultado obtido:
+
+```text
+4 passed
+```
+
+Para abrir o relatório HTML:
+
+```bash
+npm run test:playwright:report
+```
+
+### Teste de carga com Grafana K6
+
+O teste de carga realiza chamadas para os cinco endpoints da API.
+
+Primeiro, deixe a aplicação em execução:
 
 ```bash
 npm run dev
+```
+
+Em outro terminal, execute:
+
+```bash
+npm run test:k6
+```
+
+Resultados obtidos na execução final:
+
+* 63 de 63 verificações aprovadas;
+* 45 requisições realizadas;
+* taxa de erro de 0%;
+* 95% das requisições concluídas em até 1,8 segundo;
+* 9 iterações concluídas;
+* nenhuma iteração interrompida.
+
+## Verificação final
+
+Antes da entrega ou apresentação, execute:
+
+```bash
 npm run build
-npm start
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:studio
+npm test
+npm run test:playwright
 ```
 
-O Prisma Studio permite visualizar os registros do banco:
+Depois, com a aplicação em execução:
 
 ```bash
-npm run prisma:studio
+npm run test:k6
 ```
 
-## Seed de dados
+Também confira:
 
-Seed é um script que insere registros iniciais no banco, por exemplo, cinco tarefas prontas para demonstração.
-
-Ela **não é exigida pelo enunciado do trabalho**. É apenas uma melhoria opcional que pode facilitar:
-
-- demonstração durante a apresentação;
-- execução dos testes de carga com K6;
-- desenvolvimento do front-end;
-- execução dos testes com Playwright.
-
-O projeto pode ser entregue sem seed, desde que os endpoints e os testes funcionem corretamente.
-
-## Requisitos do trabalho ainda pendentes
-
-O CRUD e a conexão com o banco estão estruturados. Ainda devem ser adicionados ao projeto completo:
-
-- documentação OpenAPI/Swagger;
-- testes unitários do back-end;
-- script de teste de carga com Grafana K6;
-- front-end para manipulação das tarefas;
-- testes do front-end com Playwright;
-- resultados da execução dos testes.
-
-## Segurança
-
-- Nunca envie o arquivo `.env` para o repositório;
-- não publique a senha do banco;
-- caso uma credencial seja exposta, altere-a no Supabase;
-- mantenha somente o `.env.example` no Git.
-
----
-
-## Testes de Carga com Grafana K6
-
-O projeto conta com um script de teste de carga (`tarefas-load-test.js`) que simula o fluxo completo de um usuário na API (Criar, Listar, Buscar por ID, Atualizar e Deletar uma tarefa).
-
-### 1. Instalação do K6
-
-No Windows, instale o K6 utilizando o Winget:
-
-```bash
-winget install k6 --source winget
-
+```text
+http://localhost:3000
+http://localhost:3000/docs
+http://localhost:3000/health
 ```
-
-*(Caso utilize outro sistema operacional, consulte a documentação oficial do K6 para instalação).*
-
-### 2. Ajuste Importante de Conexão (⚠️ Crítico para o Supabase)
-
-Por padrão, testes de carga geram múltiplos acessos simultâneos. Como a aplicação utiliza uma versão gratuita ou limitada do Supabase, **o banco de dados não vai aguentar o volume de requisições e começará a retornar erros**.
-
-Para resolver isso e garantir que o teste passe com 100% de sucesso, você **precisa** limitar as conexões simultâneas que o Prisma abre. Altere o seu arquivo `.env` adicionando `&connection_limit=3` ao final da string da `DATABASE_URL`:
-
-```env
-DATABASE_URL="postgresql://postgres.SEU_PROJECT_REF:SUA_SENHA@HOST_POOLER:6543/postgres?pgbouncer=true&connection_limit=3"
-
-```
-
-### 3. Como Customizar a Carga
-
-A intensidade e a duração do teste são controladas diretamente no objeto `options` dentro do arquivo do teste:
-
-```javascript
-export const options = {
-  stages: [
-    { duration: '20s', target: 2 },  // Sobe para 2 usuários virtuais em 20 segundos
-    { duration: '20s', target: 2 },  // Mantém 2 usuários virtuais por mais 20 segundos
-    { duration: '20s', target: 0 },  // Desce para 0 usuários em 20 segundos (rampa de descida)
-  ],
-  thresholds: {
-    http_req_failed: ["rate<0.02"], // O teste falha se mais de 2% das requisições derem erro
-    http_req_duration: ["p(95)<400"], // 95% das requisições devem responder em menos de 400ms
-  },
-};
-
-```
-
-* **`duration`**: Tempo de duração daquela etapa específica.
-* **`target`**: Quantidade de Usuários Virtuais (VUs) simultâneos simulando ações na API. Se quiser testar cenários mais pesados (ex: 10, 50 ou 100 usuários), basta alterar esse valor.
-
-### 4. Executando o Teste
-
-Com a API rodando localmente (`npm run dev`), abra outro terminal e execute o comando:
-
-```bash
-k6 run tarefas-load-test.js
-
-```
-
-Ao final, o K6 exibirá um relatório completo no terminal mostrando se as métricas de sucesso e tempo de resposta foram atingidas.
