@@ -195,6 +195,7 @@ test.describe(
 
           await page
             .getByTestId("btn-editar")
+            .last()
             .click();
 
           // Confirma que o formulário recebeu os dados da tarefa
